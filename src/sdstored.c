@@ -1,5 +1,9 @@
 #include "auxStructs.h"
 
+//Comando para executar o servidor 
+//./bin/sdstored etc/sdstore.conf bin/execs/
+
+
 //Executado da pasta root do projeto
 
 char *pathToConfigFile;
@@ -193,7 +197,7 @@ void handle_sigalrm(){
                 Command c = getCommand(commandList, process->commands[i]);
                 decRunningCommand(c);
             }
-            
+
             freeProcess(process);
         }
     }
