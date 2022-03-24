@@ -15,7 +15,7 @@
 
 /** Command **/
 
-typedef struct Command{
+typedef struct command{
     char *type; //Tipo do comando (nop,gcompress,etc)
     int max;
     int running;
@@ -35,7 +35,7 @@ void printCommand(int fildes, Command c);
 
 typedef struct llCommand{
     Command command;
-    struct linkedListFilter *next;
+    struct llCommand *next;
 } *LlCommand;
 
 LlCommand newLLC(Command c);

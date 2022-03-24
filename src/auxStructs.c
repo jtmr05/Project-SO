@@ -2,7 +2,7 @@
 
 /** Command **/
 
-Command newCommand(char *line)(char *line){
+Command newCommand(char *line){
     Command c = (Command) malloc(sizeof(struct command));
     c->type     = strdup(strsep(&line," "));
     sscanf(strsep(&line," "), "%d", &c->max);
@@ -20,7 +20,7 @@ void decRunningCommand(Command c){
     c->running--;
 }
 
-nt commandAvailable (Command c){
+int commandAvailable (Command c){
     if(c->running < c->max) return 0;
     else return -1;
 }
@@ -41,7 +41,7 @@ void freeCommand(Command c){
 /** Linked List of Commands **/
 
 LlCommand newLLC(Command c){
-    LlCommand l = malloc(sizeof(struct LlCommand));
+    LlCommand l = malloc(sizeof(struct llCommand));
     l->command = c;
     l->next   = NULL;
     return l;
@@ -59,16 +59,16 @@ void freeLLC(LlCommand list){
 }
 
 void appendsLLC(LlCommand llc, Command c){
-    LlCommand l = newLLF(c);
+    LlCommand l = newLLC(c);
     while (llc->next != NULL)
-        llc = llf->next;
+        llc = llc->next;
     llc->next = l;
 }
 
 Command getCommand(LlCommand llc, char *type){
     //Percorre a linked list, à procura do command
     LlCommand tmp;
-    for(tmp = llf; tmp != NULL && strcmp(tmp->command->type, type) != 0; tmp = tmp->next);
+    for(tmp = llc; tmp != NULL && strcmp(tmp->command->type, type) != 0; tmp = tmp->next);
 
     //Se tmp != NULL então encontrou o comando
     if(tmp != NULL) return tmp->command;
@@ -247,12 +247,12 @@ int isTaskRunnable (LlCommand llc, LinkedListProcess process){
     //Verifica se a task não é impossivel de executar, se pode começar a ser executada ou não.
     int r = 1;
     for(int i = 0; i < n ; i++){
-        Command c = getCommand(commandsList,commands[i]);
+        Command c = getCommand(llc,commands[i]);
         
-        if(command == NULL || times[i] > command->max)
+        if(commands == NULL || times[i] > c->max)
             return -1;
 
-        if(times[i] > command->max - command->running)
+        if(times[i] > c->max - c->running)
             r = 0;
     }
 

@@ -77,8 +77,8 @@ int main(int argc, char *argv[]){
         int bytes = 0; 
         char buffer_gate[1] = {0};
 
-        while((bytes = read(gate_fd, gate_buffer, 1)) > 0){
-            if(gate_buffer[0] == 'B')
+        while((bytes = read(gate_fd,buffer_gate, 1)) > 0){
+            if(buffer_gate[0] == 'B')
                 break;
         }
 

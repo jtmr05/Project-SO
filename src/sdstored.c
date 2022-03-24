@@ -44,7 +44,7 @@ void processesTask(){
         for(breadth = 0; breadth < commandsCount ; breadth++){
             //Path para a pasta dos comandos
             char pathToCommand[1024]; 
-            strcpy(pathToCommand, pathToCommandExecs);
+            strcpy(pathToCommand, pathToCommandsExecs);
 
             //Path para o comando
             commandName = getCommand(commandList, process->commands[breadth])->type;
@@ -158,7 +158,7 @@ void processesTask(){
         //Atualiza a tabela de comandos
         for(int i = 0 ; i < process->commandsCount ; i++){
            	Command c = getCommand(commandList, process->commands[i]);
-            incRunningCommand(command);
+            incRunningCommand(c);
         }
 
         //Sinaliza o cliente que já começou a ser processado
@@ -191,7 +191,7 @@ void handle_sigalrm(){
         if(process != NULL){
             for(int i = 0 ; i < process->commandsCount ; i++){
                 Command c = getCommand(commandList, process->commands[i]);
-                decRunningCommand(commandList);
+                decRunningCommand(c);
             }
             freeProcess(process);
         }
