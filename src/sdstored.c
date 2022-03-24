@@ -261,7 +261,6 @@ int main(int argc, char *argv[]){
     if(mkfifo("./tmp/client_server_fifo", 0644) == -1) {perror("Fifo"); return -1;}
     if(mkfifo("./tmp/server_client_fifo", 0644) == -1) {perror("Fifo"); return -1;}
     if(mkfifo("./tmp/gate_fifo", 0644) == -1) {perror("Fifo"); return -1;}
-
     //Sinais
     signal(SIGALRM, handle_sigalrm);
     signal(SIGTERM, handle_sigterm);
@@ -278,7 +277,7 @@ int main(int argc, char *argv[]){
         int gate_fd = open("./tmp/gate_fifo", O_WRONLY);        
 
         //Sinaliza um cliente que pode enviar informacao pelo client_server_fifo
-        write(gate_fd, "S", 1);
+        write(gate_fd, "B", 1);
 
         //Fecha o gate
         close(gate_fd);
@@ -291,14 +290,15 @@ int main(int argc, char *argv[]){
         int bytes = read(client_server_fd, buffer, MESSAGE_SIZE);
 
         if(bytes > 0){            
-            if(strstr(buffer, "status") != NULL){         
+            if(strstr(buffer, "status") != NULL){
+            printf("Got here \n");         
                 //Obtem o pid do cliente
                 pid_t pid = 0;
                 sscanf(buffer, "pid: %d status", &pid);
 
                 //Print das tasks que estão à espera de ser executadas
                 write(server_client_fd, "Pending List:\n", 14);
-                if(processPendingList != NULL){
+                if(processPendingList != NULL){printf("Status");
                     for(LinkedListProcess tmp = processPendingList; tmp != NULL ; tmp = tmp->next)
                         printProcessInfo(server_client_fd, tmp);
                 }
@@ -319,8 +319,9 @@ int main(int argc, char *argv[]){
                 //Sinaliza o cliente, para que este possa continuar
                 kill(pid, SIGALRM);
             }
-            else if(strstr(buffer, "transform") != NULL){
+            else if(strstr(buffer, "proc-file") != NULL){
                 //Se a terminateFlag fôr igual a 1 então mata os clientes, informando que já não vai receber mais pedidos
+                
                 if(terminateFlag == 1){
                     //Obtem o pid do cliente
                     pid_t pid = 0;

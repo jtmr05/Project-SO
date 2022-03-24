@@ -61,7 +61,7 @@ int main(int argc, char *argv[]){
 
 		int statusOrProcess;
         if(!strcmp("status", argv[1])) statusOrProcess = STATUS;
-        else if(!strcmp("transform", argv[1])) statusOrProcess = PROCESS;
+        else if(!strcmp("proc-file", argv[1])) statusOrProcess = PROCESS;
         else printHelp();
 
         //Abre of fifo da gate
@@ -106,7 +106,7 @@ int main(int argc, char *argv[]){
         //Buffer que guardará a mensagem recebida do servidor
         char buffer[MESSAGE_SIZE] = {0};
 
-	 	if (statusOrProcess = STATUS){
+	 	if (statusOrProcess == STATUS){
 	 		//Criacao da string a enviar ao servidor
             sprintf(buffer,"pid: %d status", (int) getpid());
             
@@ -131,7 +131,7 @@ int main(int argc, char *argv[]){
 	 	}
 	 	else {
 	 		//Criacao da string a enviar ao servidor
-            sprintf(buffer,"pid: %d process\n%s\n%s", (int) getpid(), argv[2], argv[3]); //argv[2] -> input file name / argv[3] -> output file name
+            sprintf(buffer,"pid: %d proc-file\n%s\n%s", (int) getpid(), argv[2], argv[3]); //argv[2] -> input file name / argv[3] -> output file name
 
             //Acrescenta os comandos à string
             for(int i = 4; i < argc ; i++) {
