@@ -193,6 +193,7 @@ void handle_sigalrm(){
                 Command c = getCommand(commandList, process->commands[i]);
                 decRunningCommand(c);
             }
+            
             freeProcess(process);
         }
     }
