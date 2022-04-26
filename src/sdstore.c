@@ -119,10 +119,8 @@ int main(int argc, char *argv[]){
             //Caso tenha mais do que 'MESSAGE_SIZE' chars para dar print, é preciso entrar neste while
             int bytes;
             while((bytes = read(server_client_fd, buffer, MESSAGE_SIZE)) == MESSAGE_SIZE){
-                printf("%s\n",buffer);
                 memset(buffer, 0, MESSAGE_SIZE);
             }
-            printf("%s\n",buffer);
 
             //Termina o processo
             close(client_server_fd);

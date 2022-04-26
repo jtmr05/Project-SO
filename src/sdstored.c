@@ -1,7 +1,7 @@
 #include "auxStructs.h"
 
 //Comando para executar o servidor 
-//./bin/sdstored etc/sdstore.conf bin/execs/
+//./bin/sdstored etc/sdstore.conf src/
 
 
 //Executado da pasta root do projeto
@@ -32,6 +32,7 @@ void processesTask(){
     if((pid_filho = fork()) == 0){
         //Abertura do ficheiro ao qual se pretende aplicar os comandos
         int input_fp = open(process->input_file, O_RDONLY);
+
         if(input_fp == -1) { perror("Open Input file"); _exit(1); }
 
         //Criacao do ficheiro no qual ficará o resultado final de aplicar os comandos
@@ -52,10 +53,8 @@ void processesTask(){
 
             //Path para o comando
             commandName = getCommand(commandList, process->commands[breadth])->type;
-
-            /*
+            
             strcat(pathToCommand, commandName);           
-			*/	
 
             // É o primeiro comando
             if(breadth == 0){
@@ -140,7 +139,7 @@ void processesTask(){
                     close(pipes[breadth][1]);
 
                     //Execucao do comando
-                    execl(pathToCommand, commandName, NULL);
+                    //execl(pathToCommand, commandName, NULL);
                 }
                 else{
                     //Fecha o extremo de escrita do pipe
@@ -290,8 +289,7 @@ int main(int argc, char *argv[]){
         int bytes = read(client_server_fd, buffer, MESSAGE_SIZE);
 
         if(bytes > 0){            
-            if(strstr(buffer, "status") != NULL){
-            printf("Got here \n");         
+            if(strstr(buffer, "status") != NULL){      
                 //Obtem o pid do cliente
                 pid_t pid = 0;
                 sscanf(buffer, "pid: %d status", &pid);
