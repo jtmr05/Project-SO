@@ -28,21 +28,21 @@ EXECS_BIN_FILES		:= $(patsubst $(OBJ_DIR)/%.o,$(BIN_DIR)/%,$(EXECS_OBJ_FILES))
 
 
 #compiler
-CC 				:= gcc
+CC 					:= gcc
 
 #compiler flags
-CFLAGS 			:= -I$(INC_DIR) -Wall -Wextra -Wsign-conversion -g
+CFLAGS 				:= -I$(INC_DIR) -Wall -Wextra -Wsign-conversion -g
 
 #linker flags (e.g. -L/path/to/lib)
-LDFLAGS			:=
+LDFLAGS				:=
 
 #linker libraries (e.g. -lm)
-LDLIBS			:=
+LDLIBS				:=
 
 
 
 #make default goal (using make with no specified rule)
-.DEFAULT_GOAL := all
+.DEFAULT_GOAL 		:= all
 
 all: server client execs
 	@mkdir -p $(TMP_DIR)
@@ -57,12 +57,6 @@ $(SERVER_BIN): $(SERVER_OBJ_FILES)
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LDLIBS)
 
-#generate each object file according to the corresponding source file
-#create directories as needed
-#$(SERVER_OBJ_FILES): $(OBJ_DIR)/server/%.o : $(SRC_DIR)/server/%.c
-#	@mkdir -p $(@D)
-#	$(CC) $(CFLAGS) -c $< -o $@
-
 
 
 client: $(CLIENT_BIN)
@@ -70,12 +64,6 @@ client: $(CLIENT_BIN)
 $(CLIENT_BIN): $(CLIENT_OBJ_FILES)
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LDLIBS)
-
-#generate each object file according to the corresponding source file
-#create directories as needed
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -c $< -o $@
 
 
 
@@ -85,9 +73,15 @@ $(EXECS_BIN_FILES): $(BIN_DIR)/% : $(OBJ_DIR)/%.o
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LDLIBS)
 
-#$(EXECS_OBJ_FILES): $(OBJ_DIR)/execs/%.o : $(SRC_DIR)/execs/%.c
-#	@mkdir -p $(@D)
-#	$(CC) $(CFLAGS) -c $< -o $@
+
+
+#generate each object file according to the corresponding source file
+#create directories as needed
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+
 
 
 
