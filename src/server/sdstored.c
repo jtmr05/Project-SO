@@ -1,6 +1,6 @@
-#include "auxStructs.h"
+#include "server/auxStructs.h"
 
-//Comando para executar o servidor 
+//Comando para executar o servidor
 //./bin/sdstored etc/sdstore.conf src/
 
 
@@ -23,7 +23,7 @@ void processesTask(){
         processRunningList = process;
     else
         appendsProcess(processRunningList, process);
-    
+
     //Cria um processo filho que vai tratar de processar o ficheiro
     //Exit code filho:
     //  0 caso sucesso
@@ -48,13 +48,13 @@ void processesTask(){
         //Gera os diversos pipes que os processos vão usar para comunicar entre eles
         for(breadth = 0; breadth < commandsCount ; breadth++){
             //Path para a pasta dos comandos
-            char pathToCommand[1024]; 
+            char pathToCommand[1024];
             strcpy(pathToCommand, pathToCommandsExecs);
 
             //Path para o comando
             commandName = getCommand(commandList, process->commands[breadth])->type;
-            
-            strcat(pathToCommand, commandName);           
+
+            strcat(pathToCommand, commandName);
 
             // É o primeiro comando
             if(breadth == 0){
@@ -105,7 +105,7 @@ void processesTask(){
             }
             //É o último comando (Apenas quando tem mais do que um comando)
             else if(breadth == commandsCount - 1){
-                
+
                 if(fork() == 0){
                     //Redirecionamento do stdin para o extremo de leitura do pipe
                     dup2(pipes[breadth - 1][0], STDIN_FILENO);
@@ -157,7 +157,7 @@ void processesTask(){
     else {
         //Coloca o pid do filho que está a processor o ficheiro na estrutura correspondente à tarefa
         process->pid_child = pid_filho;
-        
+
         //Atualiza a tabela de comandos
         for(int i = 0 ; i < process->commandsCount ; i++){
            	Command c = getCommand(commandList, process->commands[i]);
@@ -180,7 +180,7 @@ void handle_sigalrm(){
 
     //Enquanto houverem filhos que acabaram, vai tratar deles
     pid_t pid_filho;
-    while((pid_filho = waitpid(-1, &status, WNOHANG)) > 0){        
+    while((pid_filho = waitpid(-1, &status, WNOHANG)) > 0){
         //Remove o processo da lista de "Running processes"
         LinkedListProcess process = removeProcessByChildPid(&processRunningList, pid_filho);
 
@@ -218,9 +218,9 @@ void handle_sigalrm(){
             else if(podeProcessar == 1){
                 processesTask();
             }
-            //Se podeProcessar == 0, entao vai sair do ciclo  
-            //e esperar que hajam comando disponiveis para aplicar à task 
-            //que se encontra em primeiro na lista, ou seja, 
+            //Se podeProcessar == 0, entao vai sair do ciclo
+            //e esperar que hajam comando disponiveis para aplicar à task
+            //que se encontra em primeiro na lista, ou seja,
             //a do cliente que está mais tempo à espera
         }
         else podeProcessar = 0;
@@ -248,7 +248,7 @@ void handle_sigalrm(){
 int main(int argc, char *argv[]){
     //Verifica se o path para o config file e para os comandos é fornecido.
     if(argc != 3) {printf("Verifique os argumentos.\n"); return 0;}
-    
+
     //Guarda os paths nas variaveis globais
     pathToConfigFile   = argv[1];
     pathToCommandsExecs = argv[2];
@@ -273,7 +273,7 @@ int main(int argc, char *argv[]){
     while(1){
 
         //Abre o gate
-        int gate_fd = open("./tmp/gate_fifo", O_WRONLY);        
+        int gate_fd = open("./tmp/gate_fifo", O_WRONLY);
 
         //Sinaliza um cliente que pode enviar informacao pelo client_server_fifo
         write(gate_fd, "B", 1);
@@ -285,11 +285,11 @@ int main(int argc, char *argv[]){
         int client_server_fd = open("./tmp/client_server_fifo", O_RDONLY),
             server_client_fd = open("./tmp/server_client_fifo", O_WRONLY);
 
-        //Lê do client_server_fifo 
+        //Lê do client_server_fifo
         int bytes = read(client_server_fd, buffer, MESSAGE_SIZE);
 
-        if(bytes > 0){            
-            if(strstr(buffer, "status") != NULL){      
+        if(bytes > 0){
+            if(strstr(buffer, "status") != NULL){
                 //Obtem o pid do cliente
                 pid_t pid = 0;
                 sscanf(buffer, "pid: %d status", &pid);
@@ -300,7 +300,7 @@ int main(int argc, char *argv[]){
                     for(LinkedListProcess tmp = processPendingList; tmp != NULL ; tmp = tmp->next)
                         printProcessInfo(server_client_fd, tmp);
                 }
-                else { write(server_client_fd, "No tasks are being performed!\n", 30); } 
+                else { write(server_client_fd, "No tasks are being performed!\n", 30); }
 
                 //Print das tasks a serem executadas
                 write(server_client_fd, "Processing List:\n", 17);
@@ -308,7 +308,7 @@ int main(int argc, char *argv[]){
                     for(LinkedListProcess tmp = processRunningList; tmp != NULL ; tmp = tmp->next)
                         printProcessInfo(server_client_fd, tmp);
                 }
-                else { write(server_client_fd, "No tasks are being performed!\n", 30); } 
+                else { write(server_client_fd, "No tasks are being performed!\n", 30); }
 
                 //Print dos comandos
                 for(LlCommand tmp = commandList; tmp != NULL ; tmp = tmp->next)
@@ -319,12 +319,12 @@ int main(int argc, char *argv[]){
             }
             else if(strstr(buffer, "proc-file") != NULL){
                 //Se a terminateFlag fôr igual a 1 então mata os clientes, informando que já não vai receber mais pedidos
-                
+
                 if(terminateFlag == 1){
                     //Obtem o pid do cliente
                     pid_t pid = 0;
                     sscanf(buffer, "pid: %d", &pid);
-                    
+
                     //Mata o cliente e informa que já não está a receber pedidos
                     kill(pid, SIGINT);
                 }
