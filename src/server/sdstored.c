@@ -48,13 +48,14 @@ void processesTask(){
         //Gera os diversos pipes que os processos vão usar para comunicar entre eles
         for(breadth = 0; breadth < commandsCount ; breadth++){
             //Path para a pasta dos comandos
-            char pathToCommand[1024];
-            strcpy(pathToCommand, pathToCommandsExecs);
+            const size_t size = 1024;
+            char pathToCommand[size];
+            strncpy(pathToCommand, pathToCommandsExecs, size);
 
             //Path para o comando
             commandName = getCommand(commandList, process->commands[breadth])->type;
 
-            strcat(pathToCommand, commandName);
+            strncat(pathToCommand, commandName, size);
 
             // É o primeiro comando
             if(breadth == 0){
@@ -268,7 +269,7 @@ int main(int argc, char *argv[]){
     alarm(1);
 
     //Inicializacao do buffer
-    buffer = (char *) calloc(MESSAGE_SIZE, 1);
+    buffer = calloc(MESSAGE_SIZE, sizeof *buffer);
 
     while(1){
 
@@ -348,6 +349,7 @@ int main(int argc, char *argv[]){
         close(client_server_fd);
         close(server_client_fd);
     }
+    free(buffer);
 
     return 0;
 }
