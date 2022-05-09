@@ -131,58 +131,15 @@ void freeProcess(LinkedListProcess process){
 }
 
 
-/**
- * Compara dois processos de acordo com a prioridade
- * Usada para ordernar por ordem decrescente
- * Retorna -1 número negativo se p2 < p1
- * Retorna 0 se p1 == p2
- * Retorna 1, nos restantes casos
- */
-static int cmpProcessses(const void* p1, const void* p2){
-    const int diff = (*(LinkedListProcess*) p2)->priority - (*(LinkedListProcess*) p1)->priority;
-    return (diff == 0) ? 0 : ((diff > 1) ? 1 : -1);
-}
-
-static inline size_t listLength(LinkedListProcess l){
-    size_t len = 0;
-    while(l){
-        ++len;
-        l = l->next;
-    }
-
-    return len;
-}
-
-static void sortProcessesList(LinkedListProcess *l){
-
-    const size_t len = listLength(*l);
-    LinkedListProcess *arr = malloc(sizeof *arr * len);
-    LinkedListProcess tmp = *l;
-
-    for(unsigned i = 0; i < len && tmp; ++i){
-        arr[i] = tmp;
-        tmp = tmp->next;
-    }
-
-    qsort(arr, len, sizeof *arr, cmpProcessses);
-
-    *l = arr[0];
-
-    for(unsigned i = 0; i < len - 1; ++i)
-        arr[i]->next = arr[i+1];
-
-    arr[len-1]->next = NULL;
-
-    free(arr);
-}
 
 //Appends process to the linked list
 void appendsProcess(LinkedListProcess l, LinkedListProcess p){
 
     LinkedListProcess tmp = l;
-    while(tmp->next)
+    while(tmp->next && tmp->priority >= p->priority)
         tmp = tmp->next;
 
+    p->next = tmp->next;
     tmp->next = p;
 
     sortProcessesList(&l);
