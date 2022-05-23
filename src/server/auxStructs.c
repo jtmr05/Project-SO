@@ -141,8 +141,6 @@ void appendsProcess(LinkedListProcess l, LinkedListProcess p){
 
     p->next = tmp->next;
     tmp->next = p;
-
-    sortProcessesList(&l);
 }
 
 //Dá print da info do processo, para o ficheiro fornecido
