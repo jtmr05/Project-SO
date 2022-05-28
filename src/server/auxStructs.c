@@ -3,8 +3,8 @@
 /** Command **/
 
 Command newCommand(char *line){
-    Command c = malloc(sizeof *c);
-    c->type = strdup(strsep(&line," "));
+    Command c = (Command) malloc(sizeof(struct command));
+    c->type     = strdup(strsep(&line," "));
     sscanf(strsep(&line," "), "%d", &c->max);
     c->running = 0;
     return c;
@@ -21,13 +21,13 @@ void decRunningCommand(Command c){
 }
 
 int commandAvailable (Command c){
-    return (c->running < c->max) ? 0 : -1;
+    if(c->running < c->max) return 0;
+    else return -1;
 }
 
 void printCommand(int fildes, Command c){
-    const size_t size = 256;
-    char buffer[size];
-    snprintf(buffer, size, "command %s: %d/%d (running/max)\n",c->type, c->running, c->max);
+    char buffer[256];
+    sprintf(buffer,"command %s: %d/%d (running/max)\n",c->type, c->running, c->max);
     write(fildes, buffer, strlen(buffer));
 }
 
@@ -41,9 +41,9 @@ void freeCommand(Command c){
 /** Linked List of Commands **/
 
 LlCommand newLLC(Command c){
-    LlCommand l = malloc(sizeof *l);
+    LlCommand l = malloc(sizeof(struct llCommand));
     l->command = c;
-    l->next    = NULL;
+    l->next   = NULL;
     return l;
 }
 
@@ -79,36 +79,35 @@ Command getCommand(LlCommand llc, char *type){
 /** Lista ligada com a informacao dos processos **/
 
 LinkedListProcess parseProcess(char *str, int task_number){
-    LinkedListProcess p = malloc(sizeof *p);
+    LinkedListProcess p = (LinkedListProcess) malloc(sizeof(struct linkedListProcess));
     p->pid_child    = -1;
     p->task_number  = task_number;
     p->commandsCount = 0;
     p->next         = NULL;
-
+    
     //ignora "pid:"
     strsep(&str," ");
 
     //Gets pid from client
     p->pid_client = atoi(strsep(&str," "));
 
-    //ignora "proc-file"
+    //ignora "transform"
     strsep(&str,"\n");
 
     //gets input & output files
-    p->priority     = atoi(strsep(&str, "\n"));
-    p->input_file   = strdup(strsep(&str, "\n"));
-    p->output_file  = strdup(strsep(&str, "\n"));
+    p->input_file   = strdup(strsep(&str,"\n"));
+    p->output_file  = strdup(strsep(&str,"\n"));
 
     //gets commands
     int maxCommands = 1;
-    p->commands = malloc(sizeof *(p->commands) * maxCommands);
+    p->commands = (char **) malloc(maxCommands * sizeof(char *));
     char *command;
 
     while((command = strsep(&str,"\n")) != NULL){
         //Caso de não haver espaço suficiente para os comandos
         if(p->commandsCount == maxCommands){
             maxCommands *= 2;
-            p->commands = realloc(p->commands, sizeof *(p->commands) * maxCommands);
+            p->commands = realloc(p->commands, maxCommands * sizeof(char *));
         }
 
         //Coloca o comando na estrutura
@@ -130,41 +129,26 @@ void freeProcess(LinkedListProcess process){
     }
 }
 
-
-
 //Appends process to the linked list
 void appendsProcess(LinkedListProcess l, LinkedListProcess p){
-
-    LinkedListProcess tmp = l;
-    while(tmp->next && tmp->priority >= p->priority)
-        tmp = tmp->next;
-
-    p->next = tmp->next;
+    LinkedListProcess tmp;
+    for (tmp = l; tmp->next != NULL ; tmp = tmp->next);
     tmp->next = p;
 }
 
 //Dá print da info do processo, para o ficheiro fornecido
 //Admite 'process' não nulo
 void printProcessInfo(int fildes, LinkedListProcess process){
+    char buffer[1024];
 
-    const size_t size = 1024;
-    char buffer[size];
-
-    snprintf(
-        buffer,
-        size,
-        "task #%d: process %s %s",
-        process->task_number,
-        process->input_file,
-        process->output_file
-    );
+    sprintf(buffer, "task #%d: process %s %s", process->task_number, process->input_file, process->output_file);
 
     for(int i = 0; i < process->commandsCount ; i++) {
-        strncat(buffer, " ", size);
-        strncat(buffer, process->commands[i], size);
+        strcat(buffer, " "); 
+        strcat(buffer,process->commands[i]); 
     }
 
-    strncat(buffer, "\n", size);
+    strcat(buffer,"\n");
 
     write(fildes, buffer, strlen(buffer));
 }
@@ -182,9 +166,9 @@ LinkedListProcess removeProcessByChildPid(LinkedListProcess *list, pid_t pid){
             *list = tmp->next;
         }
         else{
-            prev->next = tmp->next;
+            prev->next = tmp->next;   
         }
-
+        
         tmp->next = NULL;
         return tmp;
     }
@@ -208,7 +192,7 @@ ssize_t readln(int fd, char* line, size_t size) {
     size_t line_length = strcspn(line, "\n") + 1;
     if(bytes_read < line_length) line_length = bytes_read;
     line[line_length] = 0;
-
+    
     lseek(fd, line_length - bytes_read, SEEK_CUR);
     return line_length;
 }
@@ -220,11 +204,10 @@ LlCommand read_commands_config_file(char *filepath){
     //Abertura do ficheiro com a config
     int conf_fd  = open(filepath, O_RDONLY);
 
-    const size_t size = 1024;
-    char *buffer = malloc(sizeof *buffer * size);
+    char *buffer = (char *) malloc(1024);
 
     //Lê e processa uma linha do ficheiro config
-    while(readln(conf_fd, buffer, size) > 0){
+    while(readln(conf_fd, buffer, 1024) > 0){
         if(llc != NULL)
             appendsLLC(llc,newCommand(buffer));
         else
@@ -265,7 +248,7 @@ int isTaskRunnable (LlCommand llc, LinkedListProcess process){
     int r = 1;
     for(int i = 0; i < n ; i++){
         Command c = getCommand(llc,commands[i]);
-
+        
         if(commands == NULL || times[i] > c->max)
             return -1;
 

@@ -56,7 +56,6 @@ typedef struct linkedListProcess{
     char *output_file;
     int commandsCount;
     char **commands;
-    int priority;
     struct linkedListProcess *next;
 } *LinkedListProcess;
 
@@ -85,7 +84,7 @@ LlCommand read_commands_config_file(char *filepath);
 //Retorna:
 // -1 se o processo superar os limites do servidor.  Por exemplo, se for pedido para aplicar o command 'nop' 4x, e o servidor tiver um máximo de 3.
 //  0 se o processo não puder ser corrido de momento
-//  1 se o processo puder ser corrido neste momento
+//  1 se o processo puder ser corrido neste momento 
 int isTaskRunnable (LlCommand llc, LinkedListProcess process);
 
 #endif
