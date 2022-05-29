@@ -249,7 +249,7 @@ int isTaskRunnable (LlCommand llc, LinkedListProcess process){
     for(int i = 0; i < n ; i++){
         Command c = getCommand(llc,commands[i]);
         
-        if(commands == NULL || times[i] > c->max)
+        if(c== NULL || times[i] > c->max)
             return -1;
 
         if(times[i] > c->max - c->running)

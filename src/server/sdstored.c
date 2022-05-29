@@ -51,7 +51,7 @@ void processesTask(){
             //Path para a pasta dos comandos
             char pathToCommand[1024]; 
             strcpy(pathToCommand, pathToCommandsExecs);
-            printf("PATHTOCOMMAD  %s \n",pathToCommand);
+            
 
             //Path para o comando
             commandName = getCommand(commandList, process->commands[breadth])->type;
@@ -60,15 +60,15 @@ void processesTask(){
             strcat(pathToCommand, commandName);  
             
 
-            printf("COMANDO %s\n",pathToCommand);         
+              
 
             // É o primeiro comando
             if(breadth == 0){
-                ("PRIMEIRO COMADNO");
+                
 
                 //Situação de apenas ter um comando
                 if(commandsCount == 1){
-                    printf("%s %s ",pathToCommand,commandName);
+                  
 
                     if(fork() == 0){
                         //Redirecionamento do stdin para o ficheiro de input fornecido
@@ -216,7 +216,7 @@ void handle_sigalrm(){
         if(processPendingList != NULL){
             //Verifica se o primeiro elemento da lista (está a servir como uma espécie de queue), pode começar a ser processado
             podeProcessar = isTaskRunnable(commandList, processPendingList);
-            printf("PODE PROCESSAR %d\n",podeProcessar);
+
 
             //Se os ćomando pedidos para serem executados superarem o limite, então a task é eliminada, e o cliente é avisado
             if(podeProcessar == -1){
@@ -226,7 +226,6 @@ void handle_sigalrm(){
             }
             //Caso seja possivel processar
             else if(podeProcessar == 1){
-                printf("COMECEI!!!!!\n");
                 processesTask();
             }
             //Se podeProcessar == 0, entao vai sair do ciclo  
@@ -299,12 +298,11 @@ int main(int argc, char *argv[]){
 
         //Lê do client_server_fifo 
         int bytes = read(client_server_fd, buffer, MESSAGE_SIZE);
-       printf("%s",buffer);
+      
         
 
         if(bytes > 0){     
 
-            //printf("cheguei");
             if(strstr(buffer, "status") != NULL){      
                 //Obtem o pid do cliente
                 pid_t pid = 0;
@@ -334,7 +332,7 @@ int main(int argc, char *argv[]){
                 kill(pid, SIGALRM);
             }
             else if(strstr(buffer, "proc-file") != NULL){
-                printf("TERMININATED FLAG %d\n ",terminateFlag);
+                
                 
                 //Se a terminateFlag fôr igual a 1 então mata os clientes, informando que já não vai receber mais pedidos
                 
@@ -348,10 +346,9 @@ int main(int argc, char *argv[]){
                 }
                 else{
                     //Transforma o input num pedido
-                    printf("ESTOU A TRANSFORMAR EM PEDIDO\n");
+                
                     LinkedListProcess process = parseProcess(buffer, ++taskCount);
-                    printf("PROCESS %s     %s          %s\n",process->input_file,process->output_file,*process->commands);
-
+                 
                     //Adiciona à lista de processos em espera
                     if(processPendingList == NULL)
                         processPendingList = process;
