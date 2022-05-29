@@ -57,7 +57,7 @@ int main(int argc, char *argv[]){
     signal(SIGTERM, handle_sigterm);
     signal(SIGINT, handle_sigint);
 
-	if (argc >=2){
+	if (argc >= 2){
 
 		int statusOrProcess;
         if(!strcmp("status", argv[1])) statusOrProcess = STATUS;
@@ -66,7 +66,7 @@ int main(int argc, char *argv[]){
 
         //Abre of fifo da gate
 		int gate_fd = open("./tmp/gate_fifo", O_RDONLY);
-		
+
 		if(gate_fd == -1) {
 			perror("Erro no fifo gate");
 			return -1;
@@ -74,7 +74,7 @@ int main(int argc, char *argv[]){
 
         //Espera receber o sinal para poder enviar dados para o servidor
 
-        int bytes = 0; 
+        int bytes = 0;
         char buffer_gate[1] = {0};
 
         while((bytes = read(gate_fd,buffer_gate, 1)) > 0){
@@ -88,13 +88,13 @@ int main(int argc, char *argv[]){
         //Descritores
         int client_server_fd = open("./tmp/client_server_fifo", O_WRONLY);
 
-		if(client_server_fd == -1) { 
+		if(client_server_fd == -1) {
 			perror("Fifo");
 			close(gate_fd);
-			return -1; 
+			return -1;
 		}
-        
-        int server_client_fd = open("./tmp/server_client_fifo", O_RDONLY); 
+
+        int server_client_fd = open("./tmp/server_client_fifo", O_RDONLY);
 
         if(server_client_fd == -1) {
         	perror("Fifo");
@@ -109,7 +109,7 @@ int main(int argc, char *argv[]){
 	 	if (statusOrProcess == STATUS){
 	 		//Criacao da string a enviar ao servidor
             sprintf(buffer,"pid: %d status", (int) getpid());
-            
+
             //Escrita no fifo de cliente para servidor
             write(client_server_fd, buffer, strlen(buffer));
 
@@ -129,27 +129,44 @@ int main(int argc, char *argv[]){
             return 0;
 	 	}
 	 	else {
-	 		//Criacao da string a enviar ao servidor
-            sprintf(buffer,"pid: %d proc-file\n%s\n%s", (int) getpid(), argv[2], argv[3]); //argv[2] -> input file name / argv[3] -> output file name
 
-            //Acrescenta os comandos à string
-            for(int i = 4; i < argc ; i++) {
-                strcat(buffer, "\n"); 
-                strcat(buffer, argv[i]); 
+            int priority = 0;
+            int argOffset = 0;
+
+            if(!strcmp(argv[2], "-p")){
+                priority = atoi(argv[3]);
+                argOffset = 2;
             }
 
-            //Envio da string para o servidor
-            write(client_server_fd, buffer, strlen(buffer));
-            
+            if(priority >= 0 && priority <= 5){
 
-            //Print da mensagem que o pedido está à espera de ser processado
-            printf("Pending...\n");
+                //Criacao da string a enviar ao servidor
+                sprintf(buffer, "pid: %d proc-file\n%s\n%s\n%d", (int) getpid(),
+                    argv[2 + argOffset], argv[3 + argOffset], priority); //argv[2] -> input file name / argv[3] -> output file name
 
-            //Pausa o cliente, e espera pelo sinal 'SIGUSR1' que indicará o começo do processamento do pedido.
-            pause();
-	 	}       
+                //Acrescenta os comandos à string
+                for(int i = 4 + argOffset; i < argc; i++) {
+                    strcat(buffer, "\n");
+                    strcat(buffer, argv[i]);
+                }
+
+                //Envio da string para o servidor
+                write(client_server_fd, buffer, strlen(buffer));
+
+
+                //Print da mensagem que o pedido está à espera de ser processado
+                printf("Pending...\n");
+
+                //Pausa o cliente, e espera pelo sinal 'SIGUSR1' que indicará o começo do processamento do pedido.
+                pause();
+            }
+            else
+                printHelp();
+	 	}
 
 	}
-	else printHelp();
-	return 0;	
+	else
+        printHelp();
+
+	return 0;
 }

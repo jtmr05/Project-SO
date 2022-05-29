@@ -84,7 +84,7 @@ LinkedListProcess parseProcess(char *str, int task_number){
     p->task_number  = task_number;
     p->commandsCount = 0;
     p->next         = NULL;
-    
+
     //ignora "pid:"
     strsep(&str," ");
 
@@ -97,6 +97,7 @@ LinkedListProcess parseProcess(char *str, int task_number){
     //gets input & output files
     p->input_file   = strdup(strsep(&str,"\n"));
     p->output_file  = strdup(strsep(&str,"\n"));
+    p->priority  = atoi(strsep(&str,"\n"));
 
     //gets commands
     int maxCommands = 1;
@@ -131,9 +132,16 @@ void freeProcess(LinkedListProcess process){
 
 //Appends process to the linked list
 void appendsProcess(LinkedListProcess l, LinkedListProcess p){
-    LinkedListProcess tmp;
-    for (tmp = l; tmp->next != NULL ; tmp = tmp->next);
-    tmp->next = p;
+
+    LinkedListProcess next = l->next;
+
+    while(next != NULL && l->priority >= p->priority){
+        l = l->next;
+        next = l->next;
+    }
+
+    p->next = next;
+    l->next = p;
 }
 
 //Dá print da info do processo, para o ficheiro fornecido
@@ -144,8 +152,8 @@ void printProcessInfo(int fildes, LinkedListProcess process){
     sprintf(buffer, "task #%d: process %s %s", process->task_number, process->input_file, process->output_file);
 
     for(int i = 0; i < process->commandsCount ; i++) {
-        strcat(buffer, " "); 
-        strcat(buffer,process->commands[i]); 
+        strcat(buffer, " ");
+        strcat(buffer,process->commands[i]);
     }
 
     strcat(buffer,"\n");
@@ -166,9 +174,9 @@ LinkedListProcess removeProcessByChildPid(LinkedListProcess *list, pid_t pid){
             *list = tmp->next;
         }
         else{
-            prev->next = tmp->next;   
+            prev->next = tmp->next;
         }
-        
+
         tmp->next = NULL;
         return tmp;
     }
@@ -192,7 +200,7 @@ ssize_t readln(int fd, char* line, size_t size) {
     size_t line_length = strcspn(line, "\n") + 1;
     if(bytes_read < line_length) line_length = bytes_read;
     line[line_length] = 0;
-    
+
     lseek(fd, line_length - bytes_read, SEEK_CUR);
     return line_length;
 }
@@ -248,7 +256,7 @@ int isTaskRunnable (LlCommand llc, LinkedListProcess process){
     int r = 1;
     for(int i = 0; i < n ; i++){
         Command c = getCommand(llc,commands[i]);
-        
+
         if(c== NULL || times[i] > c->max)
             return -1;
 
