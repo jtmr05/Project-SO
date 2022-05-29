@@ -23,6 +23,13 @@ void handle_sigusr1(){
 void handle_sigusr2(){
     //Informa que o pedido acabou de ser processado
     printf("Finished.\n");
+    int bytes_fd= open("./tmp/bytes_fifo",O_RDONLY);
+    char*buffer= malloc(1024);
+    read(bytes_fd,buffer,1024);
+    char* input = strsep(&buffer,";");
+    printf("(bytes_input: %d, ",atoi(input));
+    printf("bytes_output: %d)\n",atoi(buffer));
+    close(bytes_fd);
 
     //Termina o processo
     _exit(0);
@@ -165,8 +172,7 @@ int main(int argc, char *argv[]){
 	 	}
 
 	}
-	else
-        printHelp();
+	else printHelp();
 
 	return 0;
 }
